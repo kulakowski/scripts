@@ -1,0 +1,231 @@
+#!/bin/sh
+
+set -e
+
+default_action=update
+
+repo_dir=$HOME/code
+cd $repo_dir
+
+get_action () {
+    case $1 in
+        download|fetch)
+            echo download
+            ;;
+        update|rebase)
+            echo update
+            ;;
+        s|st|status)
+            echo status
+            ;;
+        type)
+            echo type
+            ;;
+        *)
+            echo Unrecognized action \`$1\'
+            exit 1
+            ;;
+    esac
+}
+
+if [ $# -eq 0 ] ; then
+    repos="*"
+    action=${default_action}
+else
+    if [ "$1" = "--" ] ; then
+        action=${default_action}
+    else
+        action=$(get_action "$1")
+        shift
+    fi
+
+    if [ $# -eq 0 ] ; then
+        repos="*"
+    else
+        shift
+        repos="$@"
+    fi
+fi
+
+unimplemented () {
+    echo Error encountered while running \`$action\'
+    exit 1
+}
+
+do_git () {
+    case x$action in
+        xdownload)
+            git fetch
+            ;;
+        xupdate)
+            git pull --ff-only
+            ;;
+        xstatus)
+            git status
+            ;;
+        xtype)
+            echo git
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_hg () {
+    case x$action in
+        xdownload)
+            hg pull
+            ;;
+        xupdate)
+            hg update -c
+            ;;
+        xstatus)
+            hg status
+            ;;
+        xtype)
+            echo hg
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_darcs () {
+    case x$action in
+        xdownload)
+            darcs fetch
+            ;;
+        xupdate)
+            darcs pull --all --no-allow-conflicts
+            ;;
+        xstatus)
+            darcs status
+            ;;
+        xtype)
+            echo darcs
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_svn () {
+    case x$action in
+        xdownload)
+            :
+            ;;
+        xupdate)
+            svn update
+            ;;
+        xstatus)
+            svn status
+            ;;
+        xtype)
+            echo svn
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_git_svn () {
+    case x$action in
+        xdownload)
+            git svn fetch
+            ;;
+        xupdate)
+            git svn rebase
+            ;;
+        xstatus)
+            git status
+            ;;
+        xtype)
+            echo git-svn
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_smlnj () {
+    case x$action in
+        xdownload)
+            :
+            ;;
+        xupdate)
+            admin/refresh-all.sh
+            ;;
+        xstatus)
+            admin/stat-all.sh
+            ;;
+        xtype)
+            echo smlnj
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+do_ghc () {
+    case x$action in
+        xdownload)
+            ./sync-all fetch
+            ;;
+        xupdate)
+            ./sync-all pull
+            ;;
+        xstatus)
+            ./sync-all status
+            ;;
+        xtype)
+            echo ghc
+            ;;
+        *)
+            unimplemented
+            ;;
+    esac
+}
+
+for repo in $repos ; do
+    cd $repo_dir/$repo
+    echo $(basename $repo)
+
+    if [ $repo = smlnj ] ; then
+        do_smlnj $repo
+    elif [ $repo = ghc ] ; then
+        do_ghc $repo
+    elif [ $repo = llvm ] ; then
+        do_git $repo
+        echo clang
+        cd tools/clang
+        do_git $repo/tools/clang
+        echo compiler-rt
+        cd ../../projects/compiler-rt
+        do_git $repo/projects/compiler-rt
+        echo test-suite
+        cd ../test-suite
+        do_git $repo/projects/test-suite
+    elif [ -d .git/svn ] ; then
+        do_git_svn $repo
+    elif [ -d .git ] ; then
+        do_git $repo
+    elif [ -d .hg ] ; then
+        do_hg $repo
+    elif [ -d _darcs ] ; then
+        do_darcs $repo
+    elif [ -d .svn ] ; then
+        do_svn $repo
+    else
+        echo Unrecognized repository type
+        exit 1
+    fi
+
+    echo
+    echo
+done

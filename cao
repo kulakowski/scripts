@@ -1,0 +1,10 @@
+#!/usr/bin/env expect
+
+set server "crawl.akrasiac.org"
+set user "joshua"
+set pass "joshua"
+
+spawn ssh $user@$server
+expect "password:"
+send "$pass\n"
+interact

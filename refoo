@@ -1,0 +1,3 @@
+#!/bin/sh
+
+find $HOME/foo -mindepth 1 -delete
