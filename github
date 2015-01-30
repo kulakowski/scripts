@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd ~/apportable/github
+exec mirror-github

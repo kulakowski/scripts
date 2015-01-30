@@ -1,0 +1,81 @@
+#!/usr/bin/env python3 -B
+
+import base64
+import codecs
+import collections
+import itertools
+import json
+import os
+import subprocess
+import sys
+import urllib.request
+
+
+class GithubException(Exception):
+    pass
+
+
+def add_auth(request):
+    with open('./api_key', 'rb') as f:
+        api_key = f.read().strip()
+        encoded_user_pass = base64.encodestring(api_key).strip()
+    request.add_header('Authorization', b'Basic ' + encoded_user_pass)
+
+
+def next_url(response):
+    link_header = response.info().get('link')
+    if not link_header:
+        raise GithubException('No link header')
+
+    links = link_header.split(',')
+    for link in links:
+        if link.endswith('"next"'):
+            return link.split(';')[0].lstrip('<').rstrip('>')
+
+    return None
+
+
+def get_repos():
+    repos = []
+    reader = codecs.getreader('utf-8')
+
+    url = 'https://api.github.com/orgs/apportable/repos?per_page=100'
+    while url:
+        request = urllib.request.Request(url)
+        add_auth(request)
+        response = urllib.request.urlopen(request)
+        repos += json.load(reader(response))
+        url = next_url(response)
+
+    return {
+        repo[u'name']: repo[u'ssh_url']
+        for repo in repos
+    }
+
+
+def update_repo(repository, url):
+    print(repository)
+    path = os.path.join(repository + '.git')
+    if os.path.exists(path):
+        os.system('cd {} && git fetch && cd ..'.format(path))
+    else:
+        os.system('git clone --mirror {}'.format(url))
+    print()
+
+
+def update_repos(all_repos, arg_repos):
+    if arg_repos:
+        repos = { k: all_repos[k] for k in arg_repos }
+    else:
+        repos = all_repos
+
+    collections.deque(itertools.starmap(update_repo, repos.items()), 0)
+
+
+def main():
+    repos = get_repos()
+    update_repos(repos, sys.argv[1:])
+
+
+if __name__ == '__main__':
+    main()
