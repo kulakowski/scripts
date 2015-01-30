@@ -40,6 +40,9 @@ clean:
 test: toolchain
 	$(xct) $(filter-out $@,$(MAKECMDGOALS))
 
+just_test: toolchain
+	$(testcl) --skip_load $(filter-out $@,$(MAKECMDGOALS))
+
 toolchain: checkout
 	@$(dt) $(update_toolchain) $(filter-out $@,$(MAKECMDGOALS))
 
