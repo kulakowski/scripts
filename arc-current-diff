@@ -16,20 +16,20 @@ def execute(cmd, pipe=None):
     return p.communicate(pipe)
 
 
-def commit():
-    out, err = execute('git rev-parse HEAD'.split())
-    return out.strip()
+def revision():
+    out, err = execute('arc branch --output json'.split())
+    for b in json.loads(out).values():
+        if b['current']:
+            return int(b['revision'])
 
 
 def query(revision):
-    q = {
-        "commitHashes": [["gtcm", revision]]
-    }
-    out, err = execute('arc call-conduit differential.query'.split(), pipe=json.dumps(q))
+    q = {'revisionIDs': [revision]}
+    out, err = execute('arc call-conduit differential.querydiffs'.split(), pipe=json.dumps(q))
     j = json.loads(out)
-    return max(j['response'][0]['diffs'])
+    return max(j['response'].keys())
 
 
 if __name__ == '__main__':
-    c = commit()
-    print(query(c))
+    r = revision()
+    print(query(r))
