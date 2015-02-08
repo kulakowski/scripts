@@ -1,0 +1,35 @@
+#!/usr/bin/env python -B
+
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import json
+import subprocess
+import sys
+
+
+def execute(cmd, pipe=None):
+    p = subprocess.Popen(cmd,
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    return p.communicate(pipe)
+
+
+def commit():
+    out, err = execute('git rev-parse HEAD'.split())
+    return out.strip()
+
+
+def query(revision):
+    q = {
+        "commitHashes": [["gtcm", revision]]
+    }
+    out, err = execute('arc call-conduit differential.query'.split(), pipe=json.dumps(q))
+    j = json.loads(out)
+    return max(j['response'][0]['diffs'])
+
+
+if __name__ == '__main__':
+    c = commit()
+    print(query(c))

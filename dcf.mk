@@ -1,15 +1,26 @@
-release ?= no
+release := no
 ifeq ($(release), no)
-release_flag :=
+flag_release :=
 else
-release_flag := --release
+flag_release := --release
 endif
-xcode := ./setup-apportable-xcode.sh $(release_flag)
+
+xcode := ./setup-apportable-xcode.sh $(flag_release)
+
 arch := armv7a-neon
-xct := ./tests/xct.py --arch $(arch) $(release_flag)
-dcf := $(shell basename $(shell git rev-parse --show-toplevel))
+
+phab := no
+ifeq ($(phab), no)
+flag_phab :=
+else
+flag_phab := --phabricator_diff $(shell arc-current-diff)
+endif
+xct := ./tests/xct.py --arch $(arch) $(flag_release) $(flag_phab)
+
 dt := bin/dt
+
 update_toolchain := update_toolchain
+
 branch :=
 
 .phony: *
