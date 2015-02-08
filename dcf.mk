@@ -6,7 +6,7 @@ release_flag := --release
 endif
 xcode := ./setup-apportable-xcode.sh $(release_flag)
 arch := armv7a-neon
-testcl := ./tests/testcl.py --arch $(arch) $(release_flag)
+xct := ./tests/xct.py --arch $(arch) $(release_flag)
 dcf := $(shell basename $(shell git rev-parse --show-toplevel))
 dt := bin/dt
 update_toolchain := update_toolchain
@@ -27,7 +27,7 @@ clean:
 	$(xcode) --clean $(filter-out $@,$(MAKECMDGOALS))
 
 test: toolchain
-	$(testcl) $(filter-out $@,$(MAKECMDGOALS))
+	$(xct) $(filter-out $@,$(MAKECMDGOALS))
 
 toolchain: checkout
 	@$(dt) $(update_toolchain) $(filter-out $@,$(MAKECMDGOALS))
