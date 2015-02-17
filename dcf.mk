@@ -5,9 +5,12 @@ else
 flag_release := --release
 endif
 
-xcode := ./setup-apportable-xcode.sh $(flag_release)
-
-arch := armv7a-neon
+verbose := no
+ifeq ($(verbose), no)
+flag_verbose :=
+else
+flag_verbose := --verbose
+endif
 
 phab := no
 ifeq ($(phab), no)
@@ -15,7 +18,14 @@ flag_phab :=
 else
 flag_phab := --phabricator_diff $(shell arc-current-diff)
 endif
-xct := ./tests/xct.py --arch $(arch) $(flag_release) $(flag_phab)
+
+flags := $(flag_release) $(flag_verbose) $(flag_phab)
+
+xcode := ./setup-apportable-xcode.sh $(flags)
+
+arch := armv7a-neon
+
+xct := ./tests/xct.py --arch $(arch) $(flags)
 
 dt := bin/dt
 
