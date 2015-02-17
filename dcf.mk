@@ -34,6 +34,9 @@ xc: toolchain
 sb: toolchain
 	$(xcode) --sbandroid $(filter-out $@,$(MAKECMDGOALS))
 
+tengu: toolchain
+	$(xcode) --tengu $(filter-out $@,$(MAKECMDGOALS))
+
 clean:
 	$(xcode) --clean $(filter-out $@,$(MAKECMDGOALS))
 
