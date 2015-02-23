@@ -48,7 +48,7 @@ tengu: toolchain
 	$(xcode) --tengu $(filter-out $@,$(MAKECMDGOALS))
 
 clean:
-	$(xcode) --clean $(filter-out $@,$(MAKECMDGOALS))
+	$(xcode) --uninstall $(filter-out $@,$(MAKECMDGOALS))
 
 test: toolchain
 	$(xct) $(filter-out $@,$(MAKECMDGOALS))
