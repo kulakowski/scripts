@@ -19,7 +19,14 @@ else
 flag_phab := --phabricator_diff $(shell arc-current-diff)
 endif
 
-flags := $(flag_release) $(flag_verbose) $(flag_phab)
+debug := no
+ifeq ($(debug), no)
+flag_debug :=
+else
+flag_debug := --debug
+endif
+
+flags := $(flag_release) $(flag_verbose) $(flag_phab) $(flag_debug)
 
 xcode := ./setup-apportable-xcode.sh $(flags)
 
