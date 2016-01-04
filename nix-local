@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec nix-build ~/.nix/nixpkgs/pkgs/top-level/all-packages.nix -A "${@}"

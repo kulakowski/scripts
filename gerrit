@@ -1,0 +1,10 @@
+#!/bin/sh
+
+REPO=$(basename $(pwd))
+REFSPEC=$1
+BRANCH=$2
+
+cd $JIRI_ROOT/$REPO && \
+    git fetch https://fuchsia.googlesource.com/$REPO refs/changes/$REFSPEC && \
+    git checkout FETCH_HEAD && \
+    git checkout -b $BRANCH
