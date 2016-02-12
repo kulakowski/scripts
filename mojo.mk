@@ -13,6 +13,9 @@ build_dir := out/Release
 build_variant := --release
 endif
 
+clean:
+	@rm -rf $(build_dir)
+
 sync:
 	@$(mojob) sync
 
@@ -25,3 +28,6 @@ build: gn
 
 fusl: gn
 	@ninja -C $(build_dir) fusl
+
+test: build
+	$(mojob) test $(build_variant)
