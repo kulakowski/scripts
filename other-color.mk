@@ -2,7 +2,7 @@ FUCHSIA_SRC := /slice/fuchsia
 MAGENTA_SRC := $(FUCHSIA_SRC)/magenta
 TOOLCHAIN_SRC := $(FUCHSIA_SRC)/third_party/gcc_none_toolchains
 QEMU_SRC := $(FUCHSIA_SRC)/third_party/qemu
-SDK_SRC := $(FUCHSIA_SRC)/buildtools/sdk/toolchains/
+SDK_SRC := $(FUCHSIA_SRC)/buildtools/sdk/toolchains
 
 CLANG := no
 ifneq (no,$(CLANG))
@@ -69,8 +69,10 @@ endif
 BOOTFS := no
 ifneq (no,$(BOOTFS))
 FLAGS_BOOTFS := -x ../$(BOOTFS)
+FLAGS_BOOTSERVER := ../$(BOOTFS)
 else
 FLAGS_BOOTFS :=
+FLAGS_BOOTSERVER :=
 endif
 
 all: buildall
@@ -110,4 +112,4 @@ pc:
 	@$(MAKE) -C magenta magenta-pc-uefi
 
 bootserver: pc
-	$(MAGENTA_SRC)/build-magenta-pc-uefi/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-uefi/magenta.bin $(BOOTFS)
+	$(MAGENTA_SRC)/build-magenta-pc-uefi/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-uefi/magenta.bin $(FLAGS_BOOTSERVER)
