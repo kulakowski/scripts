@@ -1,6 +1,6 @@
 FUCHSIA_SRC := /slice/fuchsia
 MAGENTA_SRC := $(FUCHSIA_SRC)/magenta
-TOOLCHAIN_SRC := $(FUCHSIA_SRC)/third_party/gcc_none_toolchains
+TOOLCHAIN_SRC := $(MAGENTA_SRC)/prebuilt/downloads
 QEMU_SRC := $(FUCHSIA_SRC)/third_party/qemu
 SDK_SRC := $(FUCHSIA_SRC)/buildtools/sdk/toolchains
 
@@ -78,6 +78,9 @@ endif
 all: buildall
 	@:
 
+update:
+	jiri update
+
 clean:
 	@rm -rf $(MAGENTA_SRC)/build-*
 
@@ -113,3 +116,7 @@ pc:
 
 bootserver: pc
 	$(MAGENTA_SRC)/build-magenta-pc-uefi/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-uefi/magenta.bin $(FLAGS_BOOTSERVER)
+
+fuchsia:
+	./packages/gn/gen.py
+	./buildtools/ninja -C out/Debug
