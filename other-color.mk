@@ -39,8 +39,10 @@ endif
 J := no
 ifneq (no,$(J))
 FLAGS_J := -j $(J)
+FLAGS_NINJA_J := -j $(J)
 else
 FLAGS_J := -j
+FLAGS_NINJA_J :=
 endif
 
 K := no
@@ -69,14 +71,24 @@ endif
 BOOTFS := no
 ifneq (no,$(BOOTFS))
 FLAGS_BOOTFS := -x ../$(BOOTFS)
-FLAGS_BOOTSERVER := ../$(BOOTFS)
+FLAGS_BOOTSERVER := $(BOOTFS)
 else
 FLAGS_BOOTFS :=
 FLAGS_BOOTSERVER :=
 endif
 
+PACKAGES :=
+ifneq (,$(PACKAGES))
+FLAGS_PACKAGES := -m $(PACKAGES)
+else
+FLAGS_PACKAGES :=
+endif
+
 all: buildall
 	@:
+
+toolchain:
+	$(MAGENTA_SRC)/scripts/download-toolchain
 
 update:
 	jiri update
@@ -84,7 +96,7 @@ update:
 clean:
 	@rm -rf $(MAGENTA_SRC)/build-*
 
-arm32:
+arm32: toolchain
 	@$(MAKE) -C magenta magenta-qemu-arm32
 
 run-arm32: arm32
@@ -93,7 +105,7 @@ run-arm32: arm32
 debug-arm32:
 	@arm-eabi-gdb magenta/build-magenta-qemu-arm32/lk.elf
 
-arm64:
+arm64: toolchain
 	@$(MAKE) -C magenta magenta-qemu-arm64
 
 run-arm64: arm64
@@ -102,21 +114,24 @@ run-arm64: arm64
 debug-arm64:
 	@aarch64-elf-gdb magenta/build-magenta-qemu-arm64/lk.elf
 
-x64:
-	@$(MAKE) -C magenta magenta-qemu-x86-64
+x64: toolchain
+	@$(MAKE) -C magenta magenta-pc-x86-64
 
 run-x64: x64
 	@cd $(MAGENTA_SRC)/ && ./scripts/run-magenta-x86-64 $(FLAGS_RELEASE) $(FLAGS_U) $(FLAGS_BOOTFS) $(FLAGS_GDB)
 
-buildall:
+bootserver: x64
+	$(MAGENTA_SRC)/build-magenta-pc-x86-64/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-x86-64/magenta.bin $(FLAGS_BOOTSERVER)
+
+buildall: toolchain
 	cd $(MAGENTA_SRC) && env $(FLAGS_DEBUG) $(FLAGS_CLANG) ./scripts/buildall -r
 
-pc:
-	@$(MAKE) -C magenta magenta-pc-uefi
+fuchsia: x64
+	./packages/gn/gen.py $(FLAGS_PACKAGES)
+	./buildtools/ninja $(FLAGS_NINJA_J) -C out/Debug
 
-bootserver: pc
-	$(MAGENTA_SRC)/build-magenta-pc-uefi/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-uefi/magenta.bin $(FLAGS_BOOTSERVER)
+fuchsia-clean:
+	@echo rm -rf $(FUCHSIA_SRC)/out
 
-fuchsia:
-	./packages/gn/gen.py
-	./buildtools/ninja -C out/Debug
+listen: x64
+	$(MAGENTA_SRC)/build-magenta-pc-x86-64/tools/loglistener
