@@ -1,23 +1,24 @@
-FUCHSIA_SRC := /slice/fuchsia
-MAGENTA_SRC := $(FUCHSIA_SRC)/magenta
-TOOLCHAIN_SRC := $(MAGENTA_SRC)/prebuilt/downloads
-QEMU_SRC := $(FUCHSIA_SRC)/third_party/qemu
-SDK_SRC := $(FUCHSIA_SRC)/buildtools/sdk/toolchains
+FUCHSIA_DIR := /slice/fuchsia
+MAGENTA_DIR := $(FUCHSIA_DIR)/magenta
+TOOLCHAIN_DIR := $(MAGENTA_DIR)/prebuilt/downloads
+QEMU_DIR := $(FUCHSIA_DIR)/third_party/qemu
+BUILDTOOLS_DIR := $(FUCHSIA_DIR)/buildtools
+SDK_DIR := $(FUCHSIA_DIR)/buildtools/sdk/toolchains
 
 CLANG := no
 ifneq (no,$(CLANG))
-FLAGS_CLANG := CLANG=1 FUCHSIA=1 ARCH_x86_64_TOOLCHAIN_PREFIX=$(SDK_SRC)/clang+llvm-x86_64-linux/bin/ LIBGCC=$(SDK_SRC)/clang+llvm-x86_64-linux/lib/clang/3.9.0/lib/fuchsia/libclang_rt.builtins-x86_64.a
-export PATH := $(PATH):$(SDK_SRC)/clang+llvm-x86_64-linux/bin
+FLAGS_CLANG := CLANG=1 FUCHSIA=1 ARCH_x86_64_TOOLCHAIN_PREFIX=$(SDK_DIR)/clang+llvm-x86_64-linux/bin/ LIBGCC=$(SDK_DIR)/clang+llvm-x86_64-linux/lib/clang/3.9.0/lib/fuchsia/libclang_rt.builtins-x86_64.a
+export PATH := $(PATH):$(SDK_DIR)/clang+llvm-x86_64-linux/bin
 else
 FLAGS_CLANG :=
 endif
 
-export PATH := $(PATH):$(TOOLCHAIN_SRC)/aarch64-elf-5.3.0-Linux-x86_64/bin
-export PATH := $(PATH):$(TOOLCHAIN_SRC)/arm-eabi-5.3.0-Linux-x86_64/bin
-export PATH := $(PATH):$(TOOLCHAIN_SRC)/x86_64-elf-5.3.0-Linux-x86_64/bin
-export PATH := $(PATH):$(QEMU_SRC)/aarch64-softmmu
-export PATH := $(PATH):$(QEMU_SRC)/arm-softmmu
-export PATH := $(PATH):$(QEMU_SRC)/x86_64-softmmu
+export PATH := $(PATH):$(TOOLCHAIN_DIR)/aarch64-elf-5.3.0-Linux-x86_64/bin
+export PATH := $(PATH):$(TOOLCHAIN_DIR)/arm-eabi-5.3.0-Linux-x86_64/bin
+export PATH := $(PATH):$(TOOLCHAIN_DIR)/x86_64-elf-5.3.0-Linux-x86_64/bin
+export PATH := $(PATH):$(QEMU_DIR)/aarch64-softmmu
+export PATH := $(PATH):$(QEMU_DIR)/arm-softmmu
+export PATH := $(PATH):$(QEMU_DIR)/x86_64-softmmu
 
 export ENABLE_BUILD_LISTFILES := true
 export ENABLE_BUILD_SYSROOT := true
@@ -31,9 +32,11 @@ endif
 
 RELEASE := no
 ifneq (no,$(RELEASE))
-FLAGS_RELASE := -r
+FLAGS_RELEASE := -r
+BUILD_CMD := ./scripts/make-release
 else
 FLAGS_RELEASE :=
+BUILD_CMD := ./scripts/make-parallel
 endif
 
 J := no
@@ -52,7 +55,7 @@ else
 FLAGS_K :=
 endif
 
-MAKE := $(FLAGS_DEBUG) make $(FLAGS_CLANG) $(FLAGS_J) $(FLAGS_K)
+MAKE := $(FLAGS_DEBUG) OBJDUMP_LIST_FLAGS="-M intel" make $(FLAGS_CLANG) $(FLAGS_J) $(FLAGS_K)
 
 GDB := no
 ifneq (no,$(GDB))
@@ -61,12 +64,8 @@ else
 FLAGS_GDB :=
 endif
 
-U := no
-ifneq (no,$(U))
-FLAGS_U := -u
-else
-FLAGS_U :=
-endif
+S := 4
+FLAGS_S := -s $(S)
 
 BOOTFS := no
 ifneq (no,$(BOOTFS))
@@ -84,54 +83,65 @@ else
 FLAGS_PACKAGES :=
 endif
 
+GOMA := no
+ifneq (no,$(GOMA))
+FLAGS_GOMA := --goma
+else
+FLAGS_GOMA :=
+endif
+
 all: buildall
 	@:
 
 toolchain:
-	$(MAGENTA_SRC)/scripts/download-toolchain
+	$(MAGENTA_DIR)/scripts/download-toolchain
 
 update:
 	jiri update
 
 clean:
-	@rm -rf $(MAGENTA_SRC)/build-*
+	@rm -rf $(MAGENTA_DIR)/build-*
 
 arm32: toolchain
-	@$(MAKE) -C magenta magenta-qemu-arm32
+	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-qemu-arm32
 
 run-arm32: arm32
-	@cd $(MAGENTA_SRC) && ./scripts/run-magenta-arm32 $(FLAGS_RELEASE) $(FLAGS_U) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm32 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
 
 debug-arm32:
 	@arm-eabi-gdb magenta/build-magenta-qemu-arm32/lk.elf
 
 arm64: toolchain
-	@$(MAKE) -C magenta magenta-qemu-arm64
+	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-qemu-arm64
 
 run-arm64: arm64
-	@cd $(MAGENTA_SRC) && ./scripts/run-magenta-arm64 $(FLAGS_RELEASE) $(FLAGS_U) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
 
 debug-arm64:
 	@aarch64-elf-gdb magenta/build-magenta-qemu-arm64/lk.elf
 
 x64: toolchain
-	@$(MAKE) -C magenta magenta-pc-x86-64
+	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-pc-x86-64
 
 run-x64: x64
-	@cd $(MAGENTA_SRC)/ && ./scripts/run-magenta-x86-64 $(FLAGS_RELEASE) $(FLAGS_U) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR)/ && ./scripts/run-magenta-x86-64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
 
 bootserver: x64
-	$(MAGENTA_SRC)/build-magenta-pc-x86-64/tools/bootserver $(MAGENTA_SRC)/build-magenta-pc-x86-64/magenta.bin $(FLAGS_BOOTSERVER)
+	$(BUILDTOOLS_DIR)/bootserver $(MAGENTA_DIR)/build-magenta-pc-x86-64/magenta.bin $(FLAGS_BOOTSERVER) -- "gfxconsole.keymap=dvorak "
 
 buildall: toolchain
-	cd $(MAGENTA_SRC) && env $(FLAGS_DEBUG) $(FLAGS_CLANG) ./scripts/buildall -r
+	cd $(MAGENTA_DIR) && env $(FLAGS_DEBUG) $(FLAGS_CLANG) ./scripts/buildall -r
 
-fuchsia: x64
-	./packages/gn/gen.py $(FLAGS_PACKAGES)
-	./buildtools/ninja $(FLAGS_NINJA_J) -C out/Debug
+fuchsia-x64: x64
+	./packages/gn/gen.py $(FLAGS_PACKAGES) $(FLAGS_GOMA) --target_cpu x86-64
+	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/debug-x86-64
+
+fuchsia-arm64: arm64
+	./packages/gn/gen.py $(FLAGS_PACKAGES) --target_cpu aarch64
+	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/debug-aarch64
 
 fuchsia-clean:
-	@echo rm -rf $(FUCHSIA_SRC)/out
+	@rm -rf $(FUCHSIA_DIR)/out
 
-listen: x64
-	$(MAGENTA_SRC)/build-magenta-pc-x86-64/tools/loglistener
+listen:
+	$(BUILDTOOLS_DIR)/loglistener
