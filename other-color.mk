@@ -34,9 +34,11 @@ RELEASE := no
 ifneq (no,$(RELEASE))
 FLAGS_RELEASE := -r
 BUILD_CMD := ./scripts/make-release
+GN_OUT_DIR := release
 else
 FLAGS_RELEASE :=
 BUILD_CMD := ./scripts/make-parallel
+GN_OUT_DIR := debug
 endif
 
 J := no
@@ -83,8 +85,8 @@ else
 FLAGS_PACKAGES :=
 endif
 
-GOMA := no
-ifneq (no,$(GOMA))
+GOMA :=
+ifneq (,$(GOMA))
 FLAGS_GOMA := --goma
 else
 FLAGS_GOMA :=
@@ -106,7 +108,7 @@ arm32: toolchain
 	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-qemu-arm32
 
 run-arm32: arm32
-	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm32 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm32 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB) -m 4096
 
 debug-arm32:
 	@arm-eabi-gdb magenta/build-magenta-qemu-arm32/lk.elf
@@ -115,7 +117,7 @@ arm64: toolchain
 	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-qemu-arm64
 
 run-arm64: arm64
-	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR) && ./scripts/run-magenta-arm64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB) -m 4096
 
 debug-arm64:
 	@aarch64-elf-gdb magenta/build-magenta-qemu-arm64/lk.elf
@@ -124,21 +126,26 @@ x64: toolchain
 	@cd $(MAGENTA_DIR) && $(BUILD_CMD) magenta-pc-x86-64
 
 run-x64: x64
-	@cd $(MAGENTA_DIR)/ && ./scripts/run-magenta-x86-64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB)
+	@cd $(MAGENTA_DIR)/ && ./scripts/run-magenta-x86-64 $(FLAGS_RELEASE) $(FLAGS_S) $(FLAGS_BOOTFS) $(FLAGS_GDB) -m 4096
+
+grub: toolchain
+	@cd $(MAGENTA_DIR) && ./scripts/make-magenta-x86-64-grub
 
 bootserver: x64
-	$(BUILDTOOLS_DIR)/bootserver $(MAGENTA_DIR)/build-magenta-pc-x86-64/magenta.bin $(FLAGS_BOOTSERVER) -- "gfxconsole.keymap=dvorak "
+	$(BUILDTOOLS_DIR)/bootserver $(MAGENTA_DIR)/build-magenta-pc-x86-64/magenta.bin $(FLAGS_BOOTSERVER) -- "gfxconsole.keymap=dvorak netsvc.disable=true dummy"
 
 buildall: toolchain
 	cd $(MAGENTA_DIR) && env $(FLAGS_DEBUG) $(FLAGS_CLANG) ./scripts/buildall -r
 
 fuchsia-x64: x64
-	./packages/gn/gen.py $(FLAGS_PACKAGES) $(FLAGS_GOMA) --target_cpu x86-64
-	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/debug-x86-64
+	./scripts/build-sysroot.sh -t x86_64
+	./packages/gn/gen.py $(FLAGS_PACKAGES) $(FLAGS_RELEASE) $(FLAGS_GOMA) --target_cpu x86-64
+	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/$(GN_OUT_DIR)-x86-64
 
 fuchsia-arm64: arm64
-	./packages/gn/gen.py $(FLAGS_PACKAGES) --target_cpu aarch64
-	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/debug-aarch64
+	./scripts/build-sysroot.sh -t aarch64
+	./packages/gn/gen.py $(FLAGS_PACKAGES) $(FLAGS_RELEASE) $(FLAGS_GOMA) --target_cpu aarch64
+	$(BUILDTOOLS_DIR)/ninja $(FLAGS_NINJA_J) -C out/$(GN_OUT_DIR)-aarch64
 
 fuchsia-clean:
 	@rm -rf $(FUCHSIA_DIR)/out
