@@ -17,6 +17,12 @@ else
 GOMA :=
 endif
 
+ifeq ($(USE_CLANG),true)
+CLANG_SUFFIX := -clang
+else
+CLANG_SUFFIX :=
+endif
+
 
 FUCHSIA_DIR := /slice/fuchsia
 
@@ -30,8 +36,8 @@ QEMU_DIR := $(BUILDTOOLS_DIR)/qemu/bin
 
 FUCHSIA_OUT_DIR := $(FUCHSIA_DIR)/out
 MAGENTA_OUT_DIR := $(FUCHSIA_OUT_DIR)/build-magenta
-MAGENTA_ARM64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-qemu-arm64
-MAGENTA_X64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64
+MAGENTA_ARM64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-qemu-arm64$(CLANG_SUFFIX)
+MAGENTA_X64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(CLANG_SUFFIX)
 TOOLS_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64/tools
 
 FUCHSIA_OUT_PREFIX := $(FUCHSIA_OUT_DIR)/$(BUILD_NAME)
