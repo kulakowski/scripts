@@ -1,7 +1,9 @@
 RELEASE := false
 ifeq ($(RELEASE),false)
+RELEASE_GEN_FLAG :=
 BUILD_NAME := debug
 else
+RELEASE_GEN_FLAG := -r
 BUILD_NAME := release
 endif
 
@@ -61,17 +63,17 @@ run-x64: x64
 
 
 sysroot-arm64:
-	$(SCRIPTS_DIR)/build-sysroot.sh -t aarch64
+	$(SCRIPTS_DIR)/build-magenta.sh -t aarch64
 
 sysroot-x64:
-	$(SCRIPTS_DIR)/build-sysroot.sh -t x86_64
+	$(SCRIPTS_DIR)/build-magenta.sh -t x86_64
 
 
 packages-arm64: sysroot-arm64
-	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu aarch64 -m $(PACKAGES)
+	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu aarch64 -m $(PACKAGES) $(RELEASE_GEN_FLAG)
 
 packages-x64: sysroot-x64
-	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu x86-64 -m $(PACKAGES)
+	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu x86-64 -m $(PACKAGES) $(RELEASE_GEN_FLAG)
 
 
 fuchsia-arm64: packages-arm64
