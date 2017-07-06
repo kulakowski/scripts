@@ -1,7 +1,0 @@
-#!/bin/sh
-
-IFACE=wlan0
-
-loadkeys /data/root/dvorak.kb
-ip link set $IFACE up
-dhcpcd -i $IFACE
