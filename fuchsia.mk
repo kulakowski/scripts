@@ -35,6 +35,7 @@ MAGENTA_SCRIPTS_DIR := $(MAGENTA_DIR)/scripts
 
 BUILDTOOLS_DIR := $(FUCHSIA_DIR)/buildtools
 QEMU_DIR := $(BUILDTOOLS_DIR)/qemu/bin
+GOMA_DIR := ~/goma
 
 FUCHSIA_OUT_DIR := $(FUCHSIA_DIR)/out
 MAGENTA_OUT_DIR := $(FUCHSIA_OUT_DIR)/build-magenta
@@ -43,6 +44,10 @@ MAGENTA_X64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(CLANG_SUFFIX)
 TOOLS_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64/tools
 
 FUCHSIA_OUT_PREFIX := $(FUCHSIA_OUT_DIR)/$(BUILD_NAME)
+
+
+goma:
+	$(GOMA_DIR)/goma_ctl.py ensure_start
 
 
 arm64:
@@ -62,10 +67,10 @@ run-x64: x64
 	$(MAGENTA_SCRIPTS_DIR)/run-magenta -o $(MAGENTA_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR)
 
 
-sysroot-arm64:
+sysroot-arm64: goma
 	$(SCRIPTS_DIR)/build-magenta.sh -t aarch64
 
-sysroot-x64:
+sysroot-x64: goma
 	$(SCRIPTS_DIR)/build-magenta.sh -t x86_64
 
 
