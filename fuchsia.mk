@@ -26,7 +26,7 @@ CLANG_SUFFIX :=
 endif
 
 
-FUCHSIA_DIR := /slice/fuchsia
+FUCHSIA_DIR := $(HOME)/fuchsia
 
 SCRIPTS_DIR := $(FUCHSIA_DIR)/scripts
 
