@@ -10,7 +10,7 @@ endif
 PACKAGES := default
 
 BOOT_ARGS :=
-ALL_BOOT_ARGS := -- gfxconsole.keymap=dvorak $(BOOT_ARGS)
+ALL_BOOT_ARGS := -- virtcon.keymap=dvorak $(BOOT_ARGS)
 
 NOGOMA := false
 ifeq ($(NOGOMA),false)
