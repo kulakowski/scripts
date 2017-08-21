@@ -25,6 +25,13 @@ else
 CLANG_SUFFIX :=
 endif
 
+KVM := false
+ifneq ($(KVM),false)
+KVM_FLAGS := -k
+else
+KVM_FLAGS :=
+endif
+
 
 FUCHSIA_DIR := $(HOME)/fuchsia
 
@@ -61,10 +68,10 @@ tools:
 
 
 run-arm64: arm64
-	$(MAGENTA_SCRIPTS_DIR)/run-magenta -o $(MAGENTA_ARM64_OUT_DIR) -a arm64 -q $(QEMU_DIR)
+	$(MAGENTA_SCRIPTS_DIR)/run-magenta -o $(MAGENTA_ARM64_OUT_DIR) -a arm64 -q $(QEMU_DIR) $(KVM_FLAGS)
 
 run-x64: x64
-	$(MAGENTA_SCRIPTS_DIR)/run-magenta -o $(MAGENTA_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR)
+	$(MAGENTA_SCRIPTS_DIR)/run-magenta -o $(MAGENTA_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR) $(KVM_FLAGS)
 
 
 sysroot-arm64: goma
