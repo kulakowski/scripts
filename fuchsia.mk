@@ -19,8 +19,10 @@ else
 GOMA :=
 endif
 
-ifeq ($(USE_CLANG),true)
+GCC := false
+ifeq ($(GCC),false)
 CLANG_SUFFIX := -clang
+export USE_CLANG = true
 else
 CLANG_SUFFIX :=
 endif
