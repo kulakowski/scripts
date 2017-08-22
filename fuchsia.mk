@@ -20,11 +20,24 @@ GOMA :=
 endif
 
 GCC := false
-ifeq ($(GCC),false)
-CLANG_SUFFIX := -clang
-export USE_CLANG = true
+LTO := false
+THINLTO := false
+ifneq ($(GCC),false)
+  BUILD_SUFFIX :=
 else
-CLANG_SUFFIX :=
+  export USE_CLANG = true
+  ifeq ($(LTO),false)
+    ifeq ($(THINLTO),false)
+      BUILD_SUFFIX := -clang
+    else
+      export USE_LTO = true
+      BUILD_SUFFIX := -thinlto
+    endif
+  else
+    export USE_LTO = true
+    export USE_THINLTO = false
+    BUILD_SUFFIX := -lto
+  endif
 endif
 
 KVM := false
@@ -48,9 +61,9 @@ GOMA_DIR := ~/goma
 
 FUCHSIA_OUT_DIR := $(FUCHSIA_DIR)/out
 MAGENTA_OUT_DIR := $(FUCHSIA_OUT_DIR)/build-magenta
-MAGENTA_ARM64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-qemu-arm64$(CLANG_SUFFIX)
-MAGENTA_X64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(CLANG_SUFFIX)
-TOOLS_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(CLANG_SUFFIX)/tools
+MAGENTA_ARM64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-qemu-arm64$(BUILD_SUFFIX)
+MAGENTA_X64_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(BUILD_SUFFIX)
+TOOLS_OUT_DIR := $(MAGENTA_OUT_DIR)/build-magenta-pc-x86-64$(BUILD_SUFFIX)/tools
 
 FUCHSIA_OUT_PREFIX := $(FUCHSIA_OUT_DIR)/$(BUILD_NAME)
 
