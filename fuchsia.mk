@@ -63,6 +63,7 @@ FUCHSIA_OUT_DIR := $(FUCHSIA_DIR)/out
 ZIRCON_OUT_DIR := $(FUCHSIA_OUT_DIR)/build-zircon
 ZIRCON_ARM64_OUT_DIR := $(ZIRCON_OUT_DIR)/build-zircon-qemu-arm64$(BUILD_SUFFIX)
 ZIRCON_X64_OUT_DIR := $(ZIRCON_OUT_DIR)/build-zircon-pc-x86-64$(BUILD_SUFFIX)
+ZIRCON_GCC_X64_OUT_DIR := $(ZIRCON_OUT_DIR)/build-zircon-pc-x86-64
 TOOLS_OUT_DIR := $(ZIRCON_OUT_DIR)/build-zircon-pc-x86-64$(BUILD_SUFFIX)/tools
 
 FUCHSIA_OUT_PREFIX := $(FUCHSIA_OUT_DIR)/$(BUILD_NAME)
@@ -118,10 +119,10 @@ run-fuchsia-x64: fuchsia-x64
 
 
 boot: x64 tools
-	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_X64_OUT_DIR)/zircon.bin $(ALL_BOOT_ARGS)
+	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_GCC_X64_OUT_DIR)/zircon.bin $(ALL_BOOT_ARGS)
 
 fuchsia-boot: fuchsia-x64 tools
-	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_X64_OUT_DIR)/zircon.bin $(FUCHSIA_OUT_PREFIX)-x86-64/user.bootfs $(ALL_BOOT_ARGS)
+	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_GCC_X64_OUT_DIR)/zircon.bin $(FUCHSIA_OUT_PREFIX)-x86-64/user.bootfs $(ALL_BOOT_ARGS)
 
 
 reboot: tools
