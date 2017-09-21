@@ -7,7 +7,7 @@ RELEASE_GEN_FLAG := -r
 BUILD_NAME := release
 endif
 
-PACKAGES := default
+PACKAGES := packages/gn/default
 
 BOOT_ARGS :=
 ALL_BOOT_ARGS := -- virtcon.keymap=dvorak $(BOOT_ARGS)
