@@ -90,6 +90,13 @@ run-x64: x64
 	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR) $(KVM_FLAGS)
 
 
+coretests-arm64: arm64
+	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_ARM64_OUT_DIR) -a arm64 -q $(QEMU_DIR) $(KVM_FLAGS) -c userboot=bin/core-tests
+
+coretests-x64: x64
+	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR) $(KVM_FLAGS) -c userboot=bin/core-tests
+
+
 sysroot-arm64: goma
 	$(SCRIPTS_DIR)/build-zircon.sh -t aarch64
 
