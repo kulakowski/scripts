@@ -47,6 +47,12 @@ else
 KVM_FLAGS :=
 endif
 
+AUTORUN :=
+ifeq ($(AUTORUN),)
+AUTORUN_CMD :=
+else
+AUTORUN_CMD := -c zircon.autorun.boot=$(AUTORUN)
+endif
 
 FUCHSIA_DIR := $(HOME)/fuchsia
 
@@ -84,10 +90,10 @@ tools:
 
 
 run-arm64: arm64
-	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_ARM64_OUT_DIR) -a arm64 -q $(QEMU_DIR) $(KVM_FLAGS)
+	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_ARM64_OUT_DIR) -a arm64 -q $(QEMU_DIR) $(KVM_FLAGS) $(AUTORUN_CMD)
 
 run-x64: x64
-	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR) $(KVM_FLAGS)
+	$(ZIRCON_SCRIPTS_DIR)/run-zircon -o $(ZIRCON_X64_OUT_DIR) -a x86-64 -q $(QEMU_DIR) $(KVM_FLAGS) $(AUTORUN_CMD)
 
 
 coretests-arm64: arm64
