@@ -62,7 +62,7 @@ ZIRCON_DIR := $(FUCHSIA_DIR)/zircon
 ZIRCON_SCRIPTS_DIR := $(ZIRCON_DIR)/scripts
 
 BUILDTOOLS_DIR := $(FUCHSIA_DIR)/buildtools
-QEMU_DIR := $(BUILDTOOLS_DIR)/qemu/bin
+QEMU_DIR := $(BUILDTOOLS_DIR)/linux-x64/qemu/bin
 GOMA_DIR := ~/goma
 
 FUCHSIA_OUT_DIR := $(FUCHSIA_DIR)/out
