@@ -132,7 +132,7 @@ run-fuchsia-x64: fuchsia-x64
 
 
 boot: x64 tools
-	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_GCC_X64_OUT_DIR)/zircon.bin $(ALL_BOOT_ARGS)
+	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_X64_OUT_DIR)/zircon.bin $(ALL_BOOT_ARGS)
 
 fuchsia-boot: fuchsia-x64 tools
 	$(TOOLS_OUT_DIR)/bootserver -1 $(ZIRCON_GCC_X64_OUT_DIR)/zircon.bin $(FUCHSIA_OUT_PREFIX)-x86-64/user.bootfs $(ALL_BOOT_ARGS)
