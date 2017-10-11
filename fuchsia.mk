@@ -54,7 +54,7 @@ else
 AUTORUN_CMD := -c zircon.autorun.boot=$(AUTORUN)
 endif
 
-FUCHSIA_DIR := $(HOME)/fuchsia
+FUCHSIA_DIR := $(shell pwd)
 
 SCRIPTS_DIR := $(FUCHSIA_DIR)/scripts
 
