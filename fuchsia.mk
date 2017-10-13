@@ -111,10 +111,10 @@ sysroot-x64: goma
 
 
 packages-arm64: sysroot-arm64
-	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu aarch64 -m $(PACKAGES) $(RELEASE_GEN_FLAG)
+	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu aarch64 -p $(PACKAGES) $(RELEASE_GEN_FLAG)
 
 packages-x64: sysroot-x64
-	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu x86-64 -m $(PACKAGES) $(RELEASE_GEN_FLAG)
+	$(FUCHSIA_DIR)/packages/gn/gen.py $(GOMA) --target_cpu x86-64 -p $(PACKAGES) $(RELEASE_GEN_FLAG)
 
 
 fuchsia-arm64: packages-arm64
